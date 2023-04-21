@@ -2,6 +2,13 @@
 {
     internal class Program
     {
+        static void ExibirTitulo()
+        {
+            Console.WriteLine("\r\n░░█ █▀█ █▀▀ █▀█   █▀▄ ▄▀█   █░█ █▀▀ █░░ █░█ ▄▀█" +
+                                              "\r\n█▄█ █▄█ █▄█ █▄█   █▄▀ █▀█   ▀▄▀ ██▄ █▄▄ █▀█ █▀█\n");
+            Console.WriteLine("================================================\n");
+        }
+
         static void ExibirTabuleiro(string[,] tabuleiro)
         {
             for (int i = 0; i < 3; i++)
@@ -10,47 +17,28 @@
                 if ((i + 1) < 3)
                     Console.WriteLine("---+---+---");
             }
+            Console.WriteLine();
         }
 
-        static void JogadaComputador(string[,] tabuleiro)
+        static bool EscolherModalidade()
         {
-            Random gerador = new Random();
+            Console.WriteLine("Digite o número da modalidade que voce deseja jogar:");
+            Console.WriteLine("[1] - Player VS Player");
+            Console.WriteLine("[2] - Contra o Computador (PvE)");
+            int escolhaModalidade = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("Agora é a vez do computador!");
-            while (true)
-            {
-                int posicaoComputador = gerador.Next(1, 10);
-
-                // obtêm a posição equivalente na matriz
-                // onde x da matriz é igual a: (n-1) / qtd de linhas da matriz
-                // e y da matriz é igual a: (n-1) % qtd de colunas matriz
-                int linha = (posicaoComputador - 1) / 3;
-                int coluna = (posicaoComputador - 1) % 3;
-
-                // verifica se a posição escolhida está disponível e faz a seleção
-                if (tabuleiro[linha, coluna] == "X" || tabuleiro[linha, coluna] == "O")
-                {
-                    continue;
-                }
-                else
-                {
-                    tabuleiro[linha, coluna] = "O";
-                    break;
-                }
-            }
-
-            ExibirTabuleiro(tabuleiro);
-            System.Threading.Thread.Sleep(2500);
-            Console.Clear();
+            return escolhaModalidade == 1;
         }
 
         static bool ValidarJogada(string[,] tabuleiro, int posicao)
         {
+            // obtém a posição equivalente na matriz
             int linha = (posicao - 1) / 3;
             int coluna = (posicao - 1) % 3;
 
             if (posicao < 1 || posicao > 9)
             {
+                ExibirTitulo();
                 Console.WriteLine("Posição inválida! Tente novamente.");
                 System.Threading.Thread.Sleep(2500);
                 Console.Clear();
@@ -59,6 +47,7 @@
 
             if (tabuleiro[linha, coluna] == "X" || tabuleiro[linha, coluna] == "O")
             {
+                ExibirTitulo();
                 Console.WriteLine("Posição ocupada! Tente novamente.");
                 System.Threading.Thread.Sleep(2500);
                 Console.Clear();
@@ -66,28 +55,6 @@
             }
 
             return true;
-        }
-
-        static void JogadaUsuario(string[,] tabuleiro)
-        {
-            int posicaoUsuario;
-
-            do
-            {
-                Console.WriteLine("Agora é a sua vez!");
-
-                ExibirTabuleiro(tabuleiro);
-
-                Console.Write("Escolha uma posição válida no tabuleiro (1-9): ");
-                posicaoUsuario = int.Parse(Console.ReadLine());
-
-            } while (!ValidarJogada(tabuleiro, posicaoUsuario));
-
-            int linha = (posicaoUsuario - 1) / 3;
-            int coluna = (posicaoUsuario - 1) % 3;
-
-            tabuleiro[linha, coluna] = "X";
-            Console.Clear();
         }
 
         static bool VerificarVitoria(string[,] tabuleiro, string jogador)
@@ -116,25 +83,113 @@
             return false;
         }
 
-        static void Main(string[] args)
+        static void JogadaUsuario(string[,] tabuleiro)
         {
-            string[,] tabuleiro = new string[3, 3] { { "1", "2", "3" }, { "4", "5", "6" }, { "7", "8", "9" } };
+            int posicaoUsuario;
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("=============");
-            Console.WriteLine("JOGO DA VELHA");
-            Console.WriteLine("=============");
+            do
+            {
+                Console.WriteLine("Agora é a sua vez!\n");
+
+                ExibirTabuleiro(tabuleiro);
+
+                Console.Write("Escolha uma posição válida no tabuleiro (1-9): ");
+                posicaoUsuario = int.Parse(Console.ReadLine());
+
+            } while (!ValidarJogada(tabuleiro, posicaoUsuario));
+
+            int linha = (posicaoUsuario - 1) / 3;
+            int coluna = (posicaoUsuario - 1) % 3;
+
+            tabuleiro[linha, coluna] = "X";
+            Console.Clear();
+        }
+
+        static void JogadaComputador(string[,] tabuleiro)
+        {
+            Random gerador = new Random();
+
+            Console.WriteLine("Agora é a vez do computador!\n");
+
+            while (true)
+            {
+                int posicaoComputador = gerador.Next(1, 10);
+                int linha = (posicaoComputador - 1) / 3;
+                int coluna = (posicaoComputador - 1) % 3;
+
+                // verifica se a posição gerada está disponível e a preenche
+                if (tabuleiro[linha, coluna] == "X" || tabuleiro[linha, coluna] == "O")
+                {
+                    continue;
+                }
+                else
+                {
+                    tabuleiro[linha, coluna] = "O";
+                    break;
+                }
+            }
 
             ExibirTabuleiro(tabuleiro);
-
             System.Threading.Thread.Sleep(2500);
             Console.Clear();
+        }
 
-            string jogador = "0";
+        static void PlayerVsPlayer(string[,] tabuleiro)
+        {
+            int posicaoUsuario;
             int tentativas = 0;
+            string jogador = "X";
             bool venceu = false;
+
             while (tentativas < 9 && !venceu)
             {
+                ExibirTitulo();
+
+                do
+                {
+                    Console.WriteLine($"Agora é a vez de {jogador}!\n");
+
+                    ExibirTabuleiro(tabuleiro);
+
+                    Console.Write("Escolha uma posição válida no tabuleiro (1-9): ");
+                    posicaoUsuario = int.Parse(Console.ReadLine());
+
+                    Console.Clear();
+
+                } while (!ValidarJogada(tabuleiro, posicaoUsuario));
+
+                int linha = (posicaoUsuario - 1) / 3;
+                int coluna = (posicaoUsuario - 1) % 3;
+                tabuleiro[linha, coluna] = jogador;
+
+                venceu = VerificarVitoria(tabuleiro, jogador);
+                if (venceu)
+                {
+                    ExibirTitulo();
+                    Console.WriteLine($"{(jogador == "X" ? "X é o vencedor!\nParabéns :D" : "O é o vencedor!\nParabéns :D")}\n");
+                }
+                else if (tentativas == 8)
+                {
+                    ExibirTitulo();
+                    Console.WriteLine("Empatou!\n");
+                }
+
+                jogador = (jogador == "X") ? "O" : "X"; // alterna o jogador da vez
+
+                tentativas++;
+            }
+        }
+
+        static void PlayerVsEnvironment(string[,] tabuleiro)
+        {
+            string jogador = "O";
+            int tentativas = 0;
+            bool venceu = false;
+
+            while (tentativas < 9 && !venceu)
+            {
+                ExibirTitulo();
+
                 if (jogador == "X")
                 {
                     JogadaUsuario(tabuleiro);
@@ -147,15 +202,38 @@
                 venceu = VerificarVitoria(tabuleiro, jogador);
                 if (venceu)
                 {
+                    ExibirTitulo();
                     Console.WriteLine($"{(jogador == "X" ? "Você ganhou!\nParabéns :D" : "Computador ganhou!")}\n");
                 }
                 else if (tentativas == 8)
                 {
+                    ExibirTitulo();
                     Console.WriteLine("Empatou!\n");
                 }
 
                 jogador = (jogador == "X") ? "O" : "X"; // alterna o jogador da vez
+
                 tentativas++;
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            string[,] tabuleiro = new string[3, 3] { { "1", "2", "3" }, { "4", "5", "6" }, { "7", "8", "9" } };
+
+            ExibirTitulo();
+            ExibirTabuleiro(tabuleiro);
+
+            bool jogarPvP = EscolherModalidade();
+            Console.Clear();
+
+            if (jogarPvP)
+            {
+                PlayerVsPlayer(tabuleiro);
+            }
+            else
+            {
+                PlayerVsEnvironment(tabuleiro);
             }
 
             Console.WriteLine("Deseja jogar novamente? [S/N]");
@@ -167,7 +245,14 @@
             }
             else
             {
-                Console.WriteLine("Fim do jogo.");
+                Console.Clear();
+                ExibirTitulo();
+                Console.WriteLine("Fim do jogo.\n");
+                Console.WriteLine("▐▓█▀▀▀▀▀▀▀▀▀█▓▌░▄▄▄▄▄░" +
+                                           "\r\n▐▓█░░▀░░▀▄░░█▓▌░█▄▄▄█░" +
+                                           "\r\n▐▓█░░▄░░▄▀░░█▓▌░█▄▄▄█░" +
+                                           "\r\n▐▓█▄▄▄▄▄▄▄▄▄█▓▌░█████░" +
+                                           "\r\n░░░░▄▄███▄▄░░░░░█████░" + "\r\n");
             }
         }
     }
